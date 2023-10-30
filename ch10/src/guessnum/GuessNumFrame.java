@@ -7,10 +7,10 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-//import javax.sql.RowSetListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -149,10 +149,27 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		Object obj = e.getSource();
 		if (obj == tfInput || obj == btnInput) {
 			String userInput = tfInput.getText();
-			// TODO parseInt 예외 처리
-			int userNum = Integer.parseInt(userInput);
-			int result = manager.judge(userNum);
-			appendMessage(result, userNum);
+			try {
+				int userNum = Integer.parseInt(userInput);
+				// 범위 체크
+				if (1 < userNum || userNum > 100) {
+					// taMessage.append("\n1~100 사이의 숫자를 입력해주세요.");
+					JOptionPane.showMessageDialog(
+							GuessNumFrame.this, "1~100 사이의 숫자를 입력해주세요.", 
+							"알림", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				int result = manager.judge(userNum);
+				appendMessage(result, userNum);
+			} catch (NumberFormatException nfe) {
+				// taMessage.append("\n숫자만 입력해주세요.");
+				JOptionPane.showMessageDialog(
+						GuessNumFrame.this, "숫자만 입력해 주세요", 
+						"알림", JOptionPane.ERROR_MESSAGE);
+				tfInput.setText("");
+				return;
+			}
+			
 			int count = manager.getCount();
 			if (count == 0) {
 				taMessage.append("\n기회를 모두 소진하였습니다.");

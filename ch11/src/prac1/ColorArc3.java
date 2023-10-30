@@ -35,7 +35,7 @@ public class ColorArc3 extends JFrame{
 			g.setColor(Color.BLUE);
 			g.fillArc(100, 100, 300, 300, 210, 120);
 			g.setColor(Color.YELLOW);
-			g.fillArc(100, 100, 300,300, 330, 120);
+			g.fillArc(100, 100, 300, 300, 330, 120);
 			
 			
 		}
