@@ -19,7 +19,7 @@ public class FlyingImageEx extends JFrame {
 	private static final int MOVE_UNIT = 10;
 	
 	public FlyingImageEx() {
-		super("키보드로 이미지 움직이기");
+		super("아바타와 괴물게임 만들기");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// setTitle("키보드로 레이블 움직이기");
 		setSize(500, 500);
@@ -127,6 +127,7 @@ public class FlyingImageEx extends JFrame {
 				
 				this.setLocation(x, y);
 				if(helloX - 35 <= x && x <= helloX + 35 || helloY - 35 <= y && y <=helloY + 35) {
+					//틀림
 					return;
 				}
 				
