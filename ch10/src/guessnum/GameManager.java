@@ -26,7 +26,7 @@ public class GameManager {
 		return count;
 	}
 	public int judge(int userNum) {
-		count--;
+				count--;
 		if (userNum == targetNum) {
 			return RESULT_OK;
 		} else if (userNum < targetNum) {
