@@ -18,6 +18,7 @@ public class MenuEx extends JFrame implements ActionListener {
 	private Vector<JMenuItem> vecItem = new Vector<>();
 	private JLabel label = new JLabel();
 	
+	
 	public MenuEx() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setTitle("메뉴 예제");
