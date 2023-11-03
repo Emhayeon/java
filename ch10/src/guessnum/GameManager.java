@@ -19,7 +19,7 @@ public class GameManager {
 	public void init() {
 		count = 5;
 		targetNum = (int)(Math.random() * 100) + 1;
-		// System.out.println("targetNum:" + targetNum);
+		 System.out.println("targetNum:" + targetNum);
 	}
 	
 	public int getCount() {
@@ -35,4 +35,5 @@ public class GameManager {
 			return RESULT_SMALL;
 		}
 	}
+	
 }
