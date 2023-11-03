@@ -25,7 +25,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		= "1~100 사이의 임의의 숫자를 맞춰보세요\n";
 	private Container con = getContentPane();
 	private MyLabel barLabel = new MyLabel();
-	int barSize=100;
+	int barSize=200;
 	
 	// North
 	private JPanel pnlNorth = new JPanel();
@@ -98,10 +98,10 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		pnlSouth.setLayout(new GridLayout(1,2));
 		
 		pnlSouth.add(pnlCount);
+		pnlCount.add(lblCount);
 		pnlCount.add(tfCount);
 		pnlCount.setBackground(Color.CYAN);
 		pnlBar.setBackground(Color.CYAN);
-		pnlCount.add(lblCount);
 //		pnlSouth.add(tfCount);
 		barLabel.setBackground(Color.YELLOW);
 		pnlBar.setLayout(null);
@@ -137,14 +137,14 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		public void run() {
 			 while (true) {
                  try {
-                         Thread.sleep(100);
+                         Thread.sleep(40);
                          
                  } catch (InterruptedException e) {
                          e.printStackTrace();
                  }
                  synchronized (this) {
                          barSize--;
-                         System.out.println(barSize);
+                       //  System.out.println(barSize);
                          repaint();
                          if (barSize == 0) {
                                  try {
