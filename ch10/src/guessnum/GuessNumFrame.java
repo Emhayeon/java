@@ -8,8 +8,10 @@ import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileOutputStream;
 
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,7 +27,9 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		= "1~100 사이의 임의의 숫자를 맞춰보세요\n";
 	private Container con = getContentPane();
 	private MyLabel barLabel = new MyLabel();
-	int barSize=200;
+	int barSize=100;
+	
+	
 	
 	// North
 	private JPanel pnlNorth = new JPanel();
@@ -57,11 +61,22 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		setUI();
 		setListener();
 		setVisible(true);
+		startEnabled();
 		init();
+		
 		Thread th = new Thread(barLabel);
 		th.start();
 	}
 	
+	private void save() {
+//		int result = chooser.showSaveDialog(null);
+//		if(result == JFileChooser.APPROVE_OPTION) {
+//			String recordTime = chooser.getSelectedFile().getPath();
+//			
+//		}
+		
+	}
+
 	private void exitOneGame() {
 		tfInput.setEnabled(false);
 		btnInput.setEnabled(false);
@@ -102,27 +117,28 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		pnlCount.add(tfCount);
 		pnlCount.setBackground(Color.CYAN);
 		pnlBar.setBackground(Color.CYAN);
-//		pnlSouth.add(tfCount);
 		barLabel.setBackground(Color.YELLOW);
 		pnlBar.setLayout(null);
 		barLabel.setOpaque(true);
-		barLabel.setSize(200,20);
+		barLabel.setSize(100,20);
 		barLabel.setLocation(40, 5);
 		pnlSouth.add(pnlBar);
 		pnlBar.add(barLabel);
 		con.add(pnlSouth, BorderLayout.SOUTH);
 		
 	}
-
+	private void startEnabled() {
+		tfInput.setEnabled(false);
+		btnInput.setEnabled(false);
+	}
 	private void init() {
 		manager.init();
-		tfInput.setEnabled(true);
-		btnInput.setEnabled(true);
 		tfRecord.setEditable(false);
 		taMessage.setEditable(false);
 		tfCount.setEditable(false);
 		taMessage.setText(START_MESSAGE);
 		printHeart();
+		
 		startTime = System.currentTimeMillis();
 	}
 	public class MyLabel extends JLabel implements Runnable{
@@ -146,20 +162,28 @@ public class GuessNumFrame extends JFrame implements ActionListener {
                          barSize--;
                        //  System.out.println(barSize);
                          repaint();
+                         
                          if (barSize == 0) {
+                        	 	
                                  try {
                                         // System.out.println("대기전");
-                                         wait();
-                                         
+                                        wait();
+                                        return;
+                                	 //tfInput.setText("");
+                                	 
                                        //  System.out.println("대기후");
                                  } catch (InterruptedException e) {
                                          e.printStackTrace();
                                  }
+                                
                          }
+                                	 
+                               
+                      }
 
                  }
          }
-		}
+		
 		
 	}
 	public static void main(String[] args) {
@@ -172,10 +196,12 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		String heart = "";
 		for (int i = 0; i < count; i++) {
 			heart += "♥";
+//			System.out.println("P:"+heart);
 		}
 		tfCount.setText(heart);
 		
 	}
+	
 	
 	private void updateRecord() {
 		long elapsedTime = endTime - startTime;
@@ -190,10 +216,13 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		String resultMessage = "";
 		switch (result) {
 			case GameManager.RESULT_OK:
-				resultMessage = "----- 정답입니다. -----";
+				//resultMessage = "----- 정답입니다. -----";
+				JOptionPane.showConfirmDialog(GuessNumFrame.this, "정답입니다.", "알림", JOptionPane.CLOSED_OPTION);
 				exitOneGame();
 				endTime = System.currentTimeMillis();
+				JOptionPane.showConfirmDialog(GuessNumFrame.this, "새로운 기록 달성", "알림", JOptionPane.CLOSED_OPTION);
 				updateRecord();
+				
 				break;
 			case GameManager.RESULT_BIG:
 				resultMessage = "----- " + userNum + " 보다 큽니다. -----";
@@ -215,29 +244,30 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 				// 범위 체크
 				if (1 > userNum || userNum > 100) {
 					// taMessage.append("\n1~100 사이의 숫자를 입력해주세요.");
-					JOptionPane.showMessageDialog(GuessNumFrame.this, "1~100 사이의 숫자를 입력해주세요.", 
-							"알림", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(GuessNumFrame.this, "1~100 사이의 숫자를 입력해주세요.","알림", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				int result = manager.judge(userNum);
 				appendMessage(result, userNum);
 			} catch (NumberFormatException nfe) {
-				// taMessage.append("\n숫자만 입력해주세요.");
-				JOptionPane.showMessageDialog(
-						GuessNumFrame.this, "숫자만 입력해 주세요", 
-						"알림", JOptionPane.ERROR_MESSAGE);
+				// taMessage.append("\n 숫자만 입력해주세요.");
+				JOptionPane.showMessageDialog(GuessNumFrame.this, "숫자만 입력해 주세요","알림", JOptionPane.ERROR_MESSAGE);
 				tfInput.setText("");
 				return;
 			}
 			
 			int count = manager.getCount();
 			if (count == 0) {
-				taMessage.append("\n기회를 모두 소진하였습니다.");
+				//taMessage.append("\n 기회를 모두 소진하였습니다.");
+				JOptionPane.showMessageDialog(GuessNumFrame.this, "기회를 모두 소진하였습니다.","알림", JOptionPane.ERROR_MESSAGE);
 				exitOneGame();
 			}
 			printHeart();
+			
 			tfInput.setText("");
 		} else if (obj == btnNewGame) {
+			tfInput.setEnabled(true);
+			btnInput.setEnabled(true);
 			init();
 		}
 		

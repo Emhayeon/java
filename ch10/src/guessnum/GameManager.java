@@ -1,5 +1,9 @@
 package guessnum;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class GameManager {
 	private static GameManager instance = new GameManager();
 	private GameManager() {
@@ -25,6 +29,7 @@ public class GameManager {
 	public int getCount() {
 		return count;
 	}
+	
 	public int judge(int userNum) {
 				count--;
 		if (userNum == targetNum) {
@@ -35,5 +40,15 @@ public class GameManager {
 			return RESULT_SMALL;
 		}
 	}
-	
+//	public void save(String recordTime) {
+//		try {
+//			BufferedWriter bw = new BufferedWriter(new FileWriter(recordTime));
+//			StringBuffer sb = new StringBuffer();
+//			bw.write(sb.toString());
+//			bw.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
 }
