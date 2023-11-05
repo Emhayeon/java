@@ -40,9 +40,9 @@ public class GameManager {
 			return RESULT_SMALL;
 		}
 	}
-//	public void save(String recordTime) {
+//	public void save(String elapsedTime) {
 //		try {
-//			BufferedWriter bw = new BufferedWriter(new FileWriter(recordTime));
+//			BufferedWriter bw = new BufferedWriter(new FileWriter(elapsedTime));
 //			StringBuffer sb = new StringBuffer();
 //			bw.write(sb.toString());
 //			bw.close();
@@ -50,5 +50,5 @@ public class GameManager {
 //			e.printStackTrace();
 //		}
 //	}
-//	
+	
 }

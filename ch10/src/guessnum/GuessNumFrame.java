@@ -28,6 +28,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	private Container con = getContentPane();
 	private MyLabel barLabel = new MyLabel();
 	int barSize=100;
+	private JFileChooser chooser = new JFileChooser();
 	
 	
 	
@@ -168,7 +169,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
                                  try {
                                         // System.out.println("대기전");
                                         wait();
-                                        return;
+                                       
                                 	 //tfInput.setText("");
                                 	 
                                        //  System.out.println("대기후");
@@ -222,7 +223,11 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 				endTime = System.currentTimeMillis();
 				JOptionPane.showConfirmDialog(GuessNumFrame.this, "새로운 기록 달성", "알림", JOptionPane.CLOSED_OPTION);
 				updateRecord();
-				
+/*				int save = chooser.showSaveDialog(null);
+				if (save == JFileChooser.APPROVE_OPTION) {
+					String path = chooser.getSelectedFile().getPath();
+					manager.save(path);
+				}*/
 				break;
 			case GameManager.RESULT_BIG:
 				resultMessage = "----- " + userNum + " 보다 큽니다. -----";
