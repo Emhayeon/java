@@ -70,22 +70,46 @@ public class PhoneBookDao {
 		return false;
 	}
 	//수정
-	public void UpdateFunction(PhoneBook pb) {
-		
+	public boolean UpdateFunction(PhoneBook pb) {
+		Connection conn = null;
+		PreparedStatement pstmt = null;
 		
 		try {
-			Connection conn = getConnection();
+			conn = getConnection();
 			StringBuilder sb = new StringBuilder();
-			sb.append("UPDATE TBL_PHONEINFO SET");
+			sb.append("UPDATE TBL_PHONEINFO SET NAME,PHONE_NUMBER,BIRTHDAY,SC_NAME,SC_TYPE");
+			pstmt=conn.prepareStatement(toString());
 			
+			int count = pstmt.executeUpdate();
+			if(count > 0) {
+				return true;
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally {
 			
 		}
+		return false;
 	}
 	//삭제
 	//전체조회
+	public void AllView() {
+		Connection conn = null; 
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		try {
+			conn = getConnection();
+			StringBuffer sb = new StringBuffer();
+			sb.append("SELECT NAME,PHONE_NUMBER,BIRTHDAY,SC_NAME,SC_TYPE FROM TBL_PHONEINFO");
+			pstmt = conn.prepareStatement(sb.toString());
+			rs = pstmt.executeQuery();
+			
+		} catch (Exception e) {
+			
+		}finally {
+			
+		}
+	}
 	//검색
 	
 }

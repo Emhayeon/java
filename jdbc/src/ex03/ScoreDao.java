@@ -98,6 +98,6 @@ public class ScoreDao {
 		}finally {
 			closeAll(rs,pstmt,conn);
 		}
-		return null; //벡터는 참조형이라 리턴널해야함
+		return null; //벡터는 참조형이라 return null 해야함
 	}
 }//class
