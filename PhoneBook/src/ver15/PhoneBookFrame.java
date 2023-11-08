@@ -342,6 +342,7 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 					PhoneInfo info = this.makePhoneInfo();
 					System.out.println(info);
 					result = book.modify(info);
+					
 				}
 				
 				if (result) {
