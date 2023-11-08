@@ -34,7 +34,7 @@ public class JDBCTest2 {
 				String username = rs.getString("USERNAME");
 				int score = rs.getInt("SCORE");
 				System.out.println(username+"|"+score);
-			} //while 전체 데이터 가져오기 next 하나만가져오기 while해서 전체 데이터 가져옴
+			} //while 전체 데이터 가져오기 next 하나만가져오기 while 해서 전체 데이터 가져옴
 			
 		} catch (Exception e) {
 			e.printStackTrace();

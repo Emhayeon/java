@@ -27,6 +27,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 @SuppressWarnings("serial")
 public class PhoneBookFrame extends JFrame implements ActionListener {
+	private PhoneBookDao dao = PhoneBookDao.getInstance();
 	private static final String DELIM = " | ";
 	private PhoneBook book = PhoneBook.getInstance();
 	private Container con = getContentPane();
@@ -208,7 +209,8 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 			myInputDialog.setVisible(true);
 		
 		} else if (obj == btnGetAll || obj == miGetAll) {
-			Vector<PhoneInfo> vector = book.getAll();
+			//Vector<PhoneInfo> vector = book.getAll();
+			Vector<PhoneInfo> vector = dao.getAll();
 			if (vector == null || vector.size() == 0) {
 				taMessage.setText("---- 데이터가 없습니다. ----");
 			} else {
@@ -332,7 +334,9 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 				if (title.equals("입력")) {
 					PhoneInfo info = this.makePhoneInfo();
 					System.out.println(info);
-					result = book.addInfo(info);
+					//result = book.addInfo(info);
+					result = dao.addInfo(info);
+					System.out.println("입력 result:"+result);
 					
 				} else if (title.equals("수정")) {
 					PhoneInfo info = this.makePhoneInfo();
