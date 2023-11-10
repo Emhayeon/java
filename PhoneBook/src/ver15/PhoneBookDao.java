@@ -82,28 +82,70 @@ public class PhoneBookDao {
 		return false;
 	}
 	//수정 기능
-	public boolean upDate(){
+	public boolean modify(PhoneInfo info){
 		Connection conn = null;
 		PreparedStatement pstmt =null;
-		ResultSet rs = null;
+		int count =0;
 		try {
 			conn = this.getConnection();
-			String sql ="FROM TBL_PHONEINFO SET NAME,PHONE_NUMBER,BIRTHDAY,SC_NAME,SC_TYPE";
+			String sql ="FROM TBL_PHONEINFO SET NAME,PHONE_NUMBER,BIRTHDAY,SC_NAME,SC_TYPE WHERE NAME=?";
+			
 			pstmt = conn.prepareStatement(sql);
 			
-			int count=pstmt.executeUpdate();
+			pstmt.setString(1, info.getName());
+			pstmt.setString(2, info.getPhoneNumber());
+			pstmt.setString(3, info.getBirthDay());
+			if(info instanceof PhoneInfoSchool) {
+				pstmt.setString(4, ((PhoneInfoSchool)info).getSchool());
+				pstmt.setInt(5, SCHOOL_TYPE);
+			} else if (info instanceof PhoneInfoCompany) {
+				pstmt.setString(4, ((PhoneInfoCompany)info).getCompany());
+				pstmt.setInt(5, COMPANY_TYPE);
+			}
+			count = pstmt.executeUpdate();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			closeAll(null, pstmt, conn);
+			}
+			if (count > 0) {
+				//성공
+				return true;
+			} else {
+				//실패
+				return false;
+			}
+
+	
+	}
+	
+	//삭제 기능
+	public boolean delete(String name){
+		Connection conn = null;
+		PreparedStatement pstmt =null;
+		int count =0;
+		try {
+			conn = this.getConnection();
+			String sql ="DELETE FROM TBL_PHONEINFO WHERE NAME=?";
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, name);
+			
+			count = pstmt.executeUpdate();
 			if(count > 0) {
 				return true;
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			closeAll(rs,pstmt,conn);
-		}
+			closeAll(null, pstmt, conn);
+			}
+			
+
 		return false;
-	}
+
 	
-	//삭제 기능
+	}
 	
 	//전체조회
 	public Vector<PhoneInfo> getAll() {

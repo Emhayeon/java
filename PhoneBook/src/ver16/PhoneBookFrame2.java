@@ -1,4 +1,4 @@
-package ver15;
+package ver16; //콤보 인덱스로 정리해서 간단하게한거
 
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -26,10 +27,10 @@ import javax.swing.JTextField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 @SuppressWarnings("serial")
-public class PhoneBookFrame extends JFrame implements ActionListener {
-	private PhoneBookDao dao = PhoneBookDao.getInstance();
+public class PhoneBookFrame2 extends JFrame implements ActionListener {
 	private static final String DELIM = " | ";
 	private PhoneBook book = PhoneBook.getInstance();
+	private PhoneBookDao dao = PhoneBookDao.getInstance();
 	private Container con = getContentPane();
 	private JFileChooser chooser = new JFileChooser("./");
 	private FileNameExtensionFilter filter =
@@ -54,12 +55,16 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 	JMenuItem miUpdate = new JMenuItem("수정");
 	JMenuItem miDelete = new JMenuItem("삭제");
 	JMenuItem miExit = new JMenuItem("종료");
+	String[] columnNames = {"NAME", "PHONE_NUMBER", "BIRTHDAY", "SC_NAME"};
+	JComboBox<String> combo = new JComboBox<String>(new String[] {
+			"이름", "전화번호", "생일", "학교/회사명"
+	});
 	
 	private MyInputDialog myInputDialog = new MyInputDialog(this, "입력", true);
 	
-	public PhoneBookFrame() {
+	public PhoneBookFrame2() {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setTitle("전화번화부 ver.14");
+		setTitle("전화번화부 ver.16");
 		setSize(500, 500);
 		setUI();
 		setMenu();
@@ -128,6 +133,7 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 	private void setNorth() {
 		JPanel pnlSearch = new JPanel();
 		pnlSearch.add(new JLabel("검색:"));
+		pnlSearch.add(combo);
 		pnlSearch.add(tfSearch);
 		pnlSearch.add(btnSearch);
 		con.add(pnlSearch, BorderLayout.NORTH);
@@ -183,13 +189,34 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 		System.out.println(obj);
 		
 		if (obj == tfSearch || obj == btnSearch) {
-			String name = tfSearch.getText();
-			if (name != null && !name.equals("")) {
-				PhoneInfo info = book.searchByName(name);
-				if (info == null) {
-					taMessage.append("\n" + name + "님의 정보가 없습니다.");
+			String keyword = tfSearch.getText();
+			int index = combo.getSelectedIndex();
+			String columnName = columnNames[index];
+//			String searchOption = (String)combo.getSelectedItem();
+			if (keyword != null && !keyword.equals("")) {
+//				PhoneInfo info = book.searchByName(keyword);
+				/*
+				String columnName = null;
+				switch (searchOption) {
+				case "이름":
+					columnName = "NAME";
+					break;
+				case "전화번호":
+					columnName = "PHONE_NUMBER";
+					break;
+				case "생일":
+					columnName = "BIRTHDAY";
+					break;
+				case "학교/회사명":
+					columnName = "SC_NAME";
+					break;
+				}
+				*/
+				Vector<PhoneInfo> vec = dao.search(new SearchDto(columnName, keyword));
+				if (vec.size() == 0) {
+					taMessage.append("\n해당 정보가 없습니다.");
 				} else {
-					printData(info);
+					printData(vec);
 					taMessage.append("\n---- 검색 완료 ----");
 				}
 			}
@@ -209,7 +236,7 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 			myInputDialog.setVisible(true);
 		
 		} else if (obj == btnGetAll || obj == miGetAll) {
-			//Vector<PhoneInfo> vector = book.getAll();
+//			Vector<PhoneInfo> vector = book.getAll();
 			Vector<PhoneInfo> vector = dao.getAll();
 			if (vector == null || vector.size() == 0) {
 				taMessage.setText("---- 데이터가 없습니다. ----");
@@ -217,13 +244,12 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 				printData(vector);
 			}
 		} else if (obj == btnUpdate || obj == miUpdate) {
-			String name = JOptionPane.showInputDialog(PhoneBookFrame.this, 
+			String name = JOptionPane.showInputDialog(PhoneBookFrame2.this, 
 					"이름을 입력하세요", "입력", 
 					JOptionPane.OK_CANCEL_OPTION);
 			if (name != null && !name.equals("")) {
 				myInputDialog.setInputOrUpdate("수정");
 				PhoneInfo info = book.searchByName(name);
-				
 				if (info == null) {
 					JOptionPane.showMessageDialog(null, "데이터 수정에 실패했습니다.", "오류", JOptionPane.ERROR_MESSAGE);
 					return;
@@ -232,9 +258,8 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 				myInputDialog.setVisible(true);
 			}
 		} else if (obj == btnDelete || obj == miDelete) {
-			//boolean result = book.delete(name);
 			String name = JOptionPane.showInputDialog(null, "이름을 입력하세요");
-			boolean result = dao.delete(name);
+			boolean result = book.delete(name);
 			if (result) {
 				taMessage.append("\n" + name + "의 정보를 삭제했습니다.");
 			} else {
@@ -323,7 +348,7 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 		}
 		
 		private void showMessage(String message) {
-			JOptionPane.showMessageDialog(PhoneBookFrame.this, message, "알림", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(PhoneBookFrame2.this, message, "알림", JOptionPane.INFORMATION_MESSAGE);
 		}
 
 		@Override
@@ -336,17 +361,13 @@ public class PhoneBookFrame extends JFrame implements ActionListener {
 				if (title.equals("입력")) {
 					PhoneInfo info = this.makePhoneInfo();
 					System.out.println(info);
-					//result = book.addInfo(info);
+					// result = book.addInfo(info);
 					result = dao.addInfo(info);
-					System.out.println("입력 result:"+result);
-					
+					System.out.println("입력 result:" + result);
 				} else if (title.equals("수정")) {
 					PhoneInfo info = this.makePhoneInfo();
 					System.out.println(info);
-					//result = book.modify(info);
-					result = dao.modify(info);
-				
-					System.out.println("수정 result:"+result);
+					result = book.modify(info);
 				}
 				
 				if (result) {
