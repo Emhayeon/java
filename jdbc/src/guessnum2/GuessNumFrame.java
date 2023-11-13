@@ -4,10 +4,13 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,18 +21,24 @@ import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
 public class GuessNumFrame extends JFrame implements ActionListener {
-	private ScoreDao dao = ScoreDao.getInstance(); //싱글톤으로만들어서 이렇게 가져와야함
+	private static final int MIN_SCORE = 30000;
+	private ScoreDao scoreDao = ScoreDao.getInstance();
 	private GameManager manager = GameManager.getInstance();
 	private static final String START_MESSAGE 
 		= "1~100 사이의 임의의 숫자를 맞춰보세요\n-----기회는 5번입니다.-----";
 	private Container con = getContentPane();
+	private RecordListDialog dialog = new RecordListDialog(this, "기록보기", true);
+
+	
+	
 	// North
 	private JPanel pnlNorth = new JPanel();
 	private JTextField tfInput = new JTextField(5);
 	private JButton btnInput = new JButton("입력");
 	private JLabel lblRecord = new JLabel("기록:");
-	private JTextField tfRecord = new JTextField("300000");
+	private JTextField tfRecord = new JTextField("30000");
 	private JButton btnNewGame = new JButton("새게임");
+	private JButton btnRecordSee = new JButton("기록보기");
 	
 	// Center
 	private JTextArea taMessage = new JTextArea(START_MESSAGE);
@@ -42,9 +51,12 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	private long startTime;
 	private long endTime;
 	
-	public GuessNumFrame( ) {
+	private UserVo loginVo;
+	
+	public GuessNumFrame(UserVo userVo) {
+		this.loginVo = userVo;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setTitle("숫자맞추기");
+		setTitle("숫자맞추기 - " + loginVo.getUserId() + "(" + loginVo.getUserName() + ")");
 		setSize(700, 500);
 		setUI();
 		setListener();
@@ -61,6 +73,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		tfInput.addActionListener(this);
 		btnInput.addActionListener(this);
 		btnNewGame.addActionListener(this);
+		btnRecordSee.addActionListener(this);
 	}
 
 	private void setUI() {
@@ -86,7 +99,11 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		pnlNorth.add(tfInput);
 		pnlNorth.add(btnInput);
 		pnlNorth.add(lblRecord);
+		int minScore = scoreDao.getMinScore();//신기록 다시보기
+//		System.out.println("minScore:"+minScore);
+		tfRecord.setText(String.valueOf(minScore));//신기록 다시보기
 		pnlNorth.add(tfRecord);
+		pnlNorth.add(btnRecordSee);
 		pnlNorth.add(btnNewGame);
 		con.add(pnlNorth, BorderLayout.NORTH);
 	}
@@ -103,10 +120,9 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		startTime = System.currentTimeMillis();
 	}
 
-	public static void main(String[] args) {
-		new GuessNumFrame();
-
-	}
+//	public static void main(String[] args) {
+//		new GuessNumFrame();
+//	}
 	
 	private void printHeart() {
 		int count = manager.getCount();
@@ -119,14 +135,31 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	
 	private void updateRecord() {
 		long score = endTime - startTime;
-		String username = JOptionPane.showInputDialog(this, "이름을 입력하세요.");
-		ScoreVo scoreVo = new ScoreVo(username, (int)score);
-		dao.addScore(scoreVo);
+		if (score > MIN_SCORE) {
+			return;
+		}
+//		ScoreVo scoreVo = new ScoreVo(username, (int)score);
+		ScoreVo scoreVo = new ScoreVo();//여기서부터 다시봐 밑에 완료메세지 까지
+		scoreVo.setUserId(loginVo.getUserId());
+		scoreVo.setScore((int)score);
+		boolean result = scoreDao.addScore(scoreVo);
+		System.out.println("add score result:" + result);
+		// 데이터 입력 완료 메시지(기록 등록)
+		if (result) {
+			JOptionPane.showMessageDialog(null, "기록 입력 완료", 
+					"알림", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(null, "기록 입력 실패", 
+					"알림", JOptionPane.ERROR_MESSAGE);
+		}
+		
 		String strRecord = tfRecord.getText();
 		long lRecord = Long.parseLong(strRecord);
 		if (score < lRecord) {
 			tfRecord.setText(String.valueOf(score));
 		}
+		
+		
 	}
 
 	private void appendMessage(int result, int userNum) {
@@ -167,7 +200,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 				int result = manager.judge(userNum);
 				appendMessage(result, userNum);
 			} catch (NumberFormatException nfe) {
-				// taMessage.append("\n 숫자만 입력해주세요.");
+				// taMessage.append("\n숫자만 입력해주세요.");
 				JOptionPane.showMessageDialog(
 						GuessNumFrame.this, "숫자만 입력해 주세요", 
 						"알림", JOptionPane.ERROR_MESSAGE);
@@ -184,8 +217,41 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 			tfInput.setText("");
 		} else if (obj == btnNewGame) {
 			init();
+		} else if(obj == btnRecordSee) {
+			dialog.setVisible(true);
 		}
 		
+	}
+	public class RecordListDialog extends JDialog{
+		private TextArea recordmessage = new TextArea();
+		public RecordListDialog(JFrame owner, String title, boolean isModal) {
+			super(owner,title,isModal);
+			add(new JScrollPane(recordmessage),BorderLayout.CENTER);
+			
+			Vector<ScoreUserVo> userVos = scoreDao.recordList();
+			if(userVos != null) {
+				JOptionPane.showMessageDialog(this, "기록이 없습니다.","오류",JOptionPane.ERROR_MESSAGE);
+			} else {
+				recordmessage.setText("");
+				for(ScoreUserVo scoreUserVo  : userVos) {
+					String userid = scoreUserVo.getUserId();
+					String username = scoreUserVo.getUserName();
+					String score = scoreUserVo.getScore();
+					String regdate = scoreUserVo.getRegdate();
+					String grade = scoreUserVo.getGrade();
+					recordmessage.append(userid+"|");
+					recordmessage.append(username+"|");
+					recordmessage.append(score+"|");
+					recordmessage.append(regdate+"|");
+					recordmessage.append(grade+"|");
+					
+				}
+			}
+			
+			
+			setSize(300,200);
+			
+		}
 	}
 
 }

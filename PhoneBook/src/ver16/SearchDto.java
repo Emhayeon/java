@@ -3,6 +3,7 @@ package ver16;
 public class SearchDto {
 	private String searchOption;
 	private String keyword;
+	
 	public SearchDto() {
 		super();
 	}
