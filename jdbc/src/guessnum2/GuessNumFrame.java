@@ -7,8 +7,10 @@ import java.awt.Font;
 import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Date;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -27,7 +29,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	private static final String START_MESSAGE 
 		= "1~100 사이의 임의의 숫자를 맞춰보세요\n-----기회는 5번입니다.-----";
 	private Container con = getContentPane();
-	private RecordListDialog dialog = new RecordListDialog(this, "기록보기", true);
+	private RecordListDialog recordListDialog = new RecordListDialog(this, "기록 목록", true);
 
 	
 	
@@ -38,7 +40,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	private JLabel lblRecord = new JLabel("기록:");
 	private JTextField tfRecord = new JTextField("30000");
 	private JButton btnNewGame = new JButton("새게임");
-	private JButton btnRecordSee = new JButton("기록보기");
+	private JButton btnRecordList = new JButton("기록보기");
 	
 	// Center
 	private JTextArea taMessage = new JTextArea(START_MESSAGE);
@@ -73,7 +75,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		tfInput.addActionListener(this);
 		btnInput.addActionListener(this);
 		btnNewGame.addActionListener(this);
-		btnRecordSee.addActionListener(this);
+		btnRecordList.addActionListener(this);
 	}
 
 	private void setUI() {
@@ -103,7 +105,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 //		System.out.println("minScore:"+minScore);
 		tfRecord.setText(String.valueOf(minScore));//신기록 다시보기
 		pnlNorth.add(tfRecord);
-		pnlNorth.add(btnRecordSee);
+		pnlNorth.add(btnRecordList);
 		pnlNorth.add(btnNewGame);
 		con.add(pnlNorth, BorderLayout.NORTH);
 	}
@@ -184,6 +186,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object obj = e.getSource();
+		
 		if (obj == tfInput || obj == btnInput) {
 			String userInput = tfInput.getText();
 			try {
@@ -217,39 +220,101 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 			tfInput.setText("");
 		} else if (obj == btnNewGame) {
 			init();
-		} else if(obj == btnRecordSee) {
-			dialog.setVisible(true);
+		} else if (obj == btnRecordList) {
+			recordListDialog.getAll();
+			recordListDialog.setVisible(true);
 		}
 		
 	}
-	public class RecordListDialog extends JDialog{
-		private TextArea recordmessage = new TextArea();
-		public RecordListDialog(JFrame owner, String title, boolean isModal) {
-			super(owner,title,isModal);
-			add(new JScrollPane(recordmessage),BorderLayout.CENTER);
+	class RecordListDialog extends JDialog implements ActionListener{//쌤이한거 소영씨 한테 물어봄 다시보기
+		private JTextArea taList = new JTextArea();
+		private JPanel pnlImage = new JPanel();
+		private JButton btnLeft = new JButton(new ImageIcon("images/left.png"));
+		private JButton btnRight = new JButton(new ImageIcon("images/right.png"));
+		private JLabel lblPage = new JLabel("0/0");
+		int curPage = 1;
+		int totalPage;
+		RowNumDto rowNumDto = new RowNumDto(); //다시봐(1~10 들어있음)
+		public RecordListDialog(JFrame owner, String title, boolean modal) {
+			super(owner, title, modal);
+			setSize(500, 400);
+			int count = scoreDao.getCount();
+			/*
+			this.totalPage = count /10;
+			if(count % 10 > 0) {
+				this.totalPage +=1;
+			}*/
+			this.totalPage = (int)Math.ceil((double)count/10);
+			lblPage.setText(curPage+"/"+totalPage);
+			taList.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+			taList.setEditable(false);
+			//add(new JScrollPane(taList));
+			this.add(taList,BorderLayout.CENTER);
+			this.add(pnlImage,BorderLayout.SOUTH);
+			lblPage.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+			pnlImage.add(btnLeft);
+			pnlImage.add(lblPage);
+			pnlImage.add(btnRight);
+			pnlImage.setBackground(Color.GREEN);
+			btnLeft.addActionListener(this);
+			btnRight.addActionListener(this);
+			btnLeft.setEnabled(false);
+			//scoreuservo 바꿔
 			
-			Vector<ScoreUserVo> userVos = scoreDao.recordList();
-			if(userVos != null) {
-				JOptionPane.showMessageDialog(this, "기록이 없습니다.","오류",JOptionPane.ERROR_MESSAGE);
-			} else {
-				recordmessage.setText("");
-				for(ScoreUserVo scoreUserVo  : userVos) {
-					String userid = scoreUserVo.getUserId();
-					String username = scoreUserVo.getUserName();
-					String score = scoreUserVo.getScore();
-					String regdate = scoreUserVo.getRegdate();
-					String grade = scoreUserVo.getGrade();
-					recordmessage.append(userid+"|");
-					recordmessage.append(username+"|");
-					recordmessage.append(score+"|");
-					recordmessage.append(regdate+"|");
-					recordmessage.append(grade+"|");
-					
-				}
+			
+		}
+		
+		public void getAll() {
+			taList.setText("");
+			
+			Vector<ScoreUserVo> recordList = scoreDao.getAll(rowNumDto);//다시봐
+			System.out.println("recordList:" + recordList);
+//			for (ScoreUserVo scoreUserVo: recordList) {
+			for (int i = 0; i < recordList.size(); i++) {
+				ScoreUserVo scoreUserVo = recordList.get(i);
+				String userId = scoreUserVo.getUserId();
+				String userName = scoreUserVo.getUserName();
+				int score = scoreUserVo.getScore();
+				Date regdate = scoreUserVo.getRegdate();
+				String grade = scoreUserVo.getGrade();
+				
+				taList.append(String.valueOf(i + 1));
+				taList.append(".");
+				taList.append(userId);
+				taList.append(" | ");
+				taList.append(userName);
+				taList.append(" | ");
+				taList.append(String.valueOf(score));
+				taList.append(" | ");
+				taList.append(regdate.toString());
+				taList.append(" | ");
+				taList.append(grade);
+				taList.append("\n");
 			}
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			Object obj = e.getSource();
 			
-			
-			setSize(300,200);
+			if(obj == btnLeft) {
+				curPage--;
+				
+				
+			} else if(obj == btnRight){
+				curPage++;
+				if(curPage == totalPage) {
+					btnRight.setEnabled(false);
+				} else if(curPage < totalPage) {
+					btnRight.setEnabled(true);
+				}
+				if(curPage > totalPage) {
+					curPage = totalPage;
+				}
+				
+				rowNumDto.setStartEndRow(curPage);
+				getAll();
+			}
 			
 		}
 	}

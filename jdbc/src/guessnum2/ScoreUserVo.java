@@ -1,43 +1,56 @@
 package guessnum2;
 
+import java.sql.Date;
+
 public class ScoreUserVo {
-	private String user_id;
-	private String user_name;
-	private String score;
-	private String regdate;
+	private String userId;
+	private String userName;
+	private int score;
+	private Date regdate;
 	private String grade;
-	
-	public ScoreUserVo() {}
+
+	public ScoreUserVo() {
+		super();
+	}
+
+	public ScoreUserVo(String userId, String userName, int score, Date regdate, String grade) {
+		super();
+		this.userId = userId;
+		this.userName = userName;
+		this.score = score;
+		this.regdate = regdate;
+		this.grade = grade;
+	}
 
 	public String getUserId() {
-		return user_id;
+		return userId;
 	}
 
 	public void setUserId(String userId) {
-		this.user_id = userId;
+		this.userId = userId;
 	}
 
 	public String getUserName() {
-		return user_name;
+		return userName;
 	}
 
 	public void setUserName(String userName) {
-		this.user_name = userName;
+		this.userName = userName;
 	}
 
-	public String getScore() {
+	public int getScore() {
 		return score;
 	}
 
-	public void setScore(String score) {
+	public void setScore(int score) {
 		this.score = score;
 	}
 
-	public String getRegdate() {
+	public Date getRegdate() {
 		return regdate;
 	}
 
-	public void setRegdate(String regdate) {
+	public void setRegdate(Date regdate) {
 		this.regdate = regdate;
 	}
 
@@ -49,20 +62,10 @@ public class ScoreUserVo {
 		this.grade = grade;
 	}
 
-	public ScoreUserVo(String userId, String userName, String score, String regdate, String grade) {
-		super();
-		this.user_id = userId;
-		this.user_name = userName;
-		this.score = score;
-		this.regdate = regdate;
-		this.grade = grade;
-	}
-
 	@Override
 	public String toString() {
-		return "ScoreUserVo [userId=" + user_id + ", userName=" + user_name + ", score=" + score + ", regdate=" + regdate
+		return "ScoreUserVo [userId=" + userId + ", userName=" + userName + ", score=" + score + ", regdate=" + regdate
 				+ ", grade=" + grade + "]";
 	}
-	
-	
+
 }
