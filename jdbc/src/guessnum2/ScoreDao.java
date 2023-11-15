@@ -7,35 +7,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Vector;
 
-public class ScoreDao {
+public class ScoreDao extends BasicAbstractDao{
 	private static ScoreDao instance = new ScoreDao();
 	private ScoreDao() { }
 	public static ScoreDao getInstance() {
 		return instance;
 	}
 	
-	private static final String DRIVER_NAME = "oracle.jdbc.driver.OracleDriver";
-	private static final String URL = "jdbc:oracle:thin:@localhost:1521:xe";
-	private static final String ID = "USER01";
-	private static final String PW = "1234";
-	private static final int MIN_SCORE = 30000;
-	
-	private Connection getConnection() {
-		try {
-			Class.forName(DRIVER_NAME);
-			Connection conn = DriverManager.getConnection(URL, ID, PW);
-			return conn;
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
-	
-	private void closeAll(ResultSet rs, PreparedStatement pstmt, Connection conn) {
-		if (rs != null) try { rs.close(); } catch (Exception e) { }
-		if (pstmt != null) try { pstmt.close(); } catch (Exception e) { }
-		if (conn != null) try { conn.close(); } catch (Exception e) { }
-	}
 	
 	public boolean addScore(ScoreVo scoreVo) {
 		Connection conn = null;
@@ -96,21 +74,20 @@ public class ScoreDao {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
 		try {
 			conn = getConnection();
-			/*String sql ="SELECT U.USER_ID, U.USER_NAME, S.SCORE, S.REGDATE, G.GRADE --Į�� �߷�����\r\n"
-					+ "FROM TBL_USER U, TBL_SCORE S, TBL_SCORE_GRADE G\r\n"
-					+ "WHERE U.USER_ID = S.USER_ID\r\n"
-					+ "AND S.SCORE BETWEEN G.LO_SCORE AND G.HI_SCORE\r\n"
-					+ "ORDER BY S.SCORE ASC,U.USER_ID ASC ";*/
-			String sql = "SELECT * FROM(SELECT ROWNUM RN, A.*"
-					+ "					FROM (SELECT U.USER_ID, U.USER_NAME, S.SCORE, S.REGDATE, G.GRADE"
-					+ "							FROM TBL_USER U, TBL_SCORE S, TBL_SCORE_GRADE G"
-					+ "							WHERE U.USER_ID = S.USER_ID"
-					+ "							AND S.SCORE BETWEEN G.LO_SCORE AND G.HI_SCORE"
-					+ "							ORDER BY S.SCORE ASC,U.USER_ID ASC) A)"
-					+ "		WHERE RN BETWEEN ? AND ?";
+//			String sql = "SELECT U.USER_ID, U.USER_NAME, S.SCORE, S.REGDATE, G.GRADE"
+//					+ "   FROM TBL_USER U, TBL_SCORE S, TBL_SCORE_GRADE G"
+//					+ "   WHERE U.USER_ID = S.USER_ID"
+//					+ "   AND S.SCORE BETWEEN G.LO_SCORE AND G.HI_SCORE"
+//					+ "   ORDER BY S.SCORE ASC, U.USER_ID ASC";
+			
+			String sql = "SELECT * FROM (SELECT ROWNUM RN, A.* FROM (SELECT U.USER_ID, U.USER_NAME, S.SCORE, S.REGDATE, G.GRADE"
+					+ "                            FROM TBL_USER U, TBL_SCORE S, TBL_SCORE_GRADE G"
+					+ "                            WHERE U.USER_ID = S.USER_ID"
+					+ "                            AND S.SCORE BETWEEN G.LO_SCORE AND G.HI_SCORE"
+					+ "                            ORDER BY S.SCORE ASC, U.USER_ID ASC) A)"
+					+ "   WHERE RN BETWEEN ? AND ?";
 			
 			pstmt = conn.prepareStatement(sql);
 			pstmt.setInt(1, rowNumDto.getStartRow());
@@ -118,12 +95,13 @@ public class ScoreDao {
 			rs = pstmt.executeQuery();
 			Vector<ScoreUserVo> vec = new Vector<>();
 			while (rs.next()) {
+				int rn = rs.getInt("RN");
 				String userId = rs.getString("USER_ID");
 				String userName = rs.getString("USER_NAME");
 				int score = rs.getInt("SCORE");
 				Date regdate = rs.getDate("REGDATE");
 				String grade = rs.getString("GRADE");
-				ScoreUserVo scoreUserVo = new ScoreUserVo(userId, userName, score, regdate, grade);		
+				ScoreUserVo scoreUserVo = new ScoreUserVo(rn, userId, userName, score, regdate, grade);		
 				vec.add(scoreUserVo);
 			}
 			return vec;
@@ -140,24 +118,21 @@ public class ScoreDao {
 		Connection conn = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
 		try {
 			conn = getConnection();
-			String sql = "SELECT COUNT(*) AS CNT FROM TBL_SCORE";
+			String sql = "SELECT COUNT(*) CNT FROM TBL_SCORE";
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
-			if(rs.next()) {
+			if (rs.next()) {
 				int count = rs.getInt("CNT");
 				return count;
 			}
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			closeAll(rs, pstmt, conn);
 		}
 		return 0;
-		
 	}
 	
 	

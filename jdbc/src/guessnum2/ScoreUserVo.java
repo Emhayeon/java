@@ -3,6 +3,7 @@ package guessnum2;
 import java.sql.Date;
 
 public class ScoreUserVo {
+	private int rn;
 	private String userId;
 	private String userName;
 	private int score;
@@ -13,13 +14,22 @@ public class ScoreUserVo {
 		super();
 	}
 
-	public ScoreUserVo(String userId, String userName, int score, Date regdate, String grade) {
+	public ScoreUserVo(int rn, String userId, String userName, int score, Date regdate, String grade) {
 		super();
+		this.rn = rn;
 		this.userId = userId;
 		this.userName = userName;
 		this.score = score;
 		this.regdate = regdate;
 		this.grade = grade;
+	}
+
+	public int getRn() {
+		return rn;
+	}
+
+	public void setRn(int rn) {
+		this.rn = rn;
 	}
 
 	public String getUserId() {
@@ -64,8 +74,8 @@ public class ScoreUserVo {
 
 	@Override
 	public String toString() {
-		return "ScoreUserVo [userId=" + userId + ", userName=" + userName + ", score=" + score + ", regdate=" + regdate
-				+ ", grade=" + grade + "]";
+		return "ScoreUserVo [rn=" + rn + ", userId=" + userId + ", userName=" + userName + ", score=" + score
+				+ ", regdate=" + regdate + ", grade=" + grade + "]";
 	}
 
 }

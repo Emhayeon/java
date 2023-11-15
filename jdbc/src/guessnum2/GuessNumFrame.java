@@ -4,10 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Date;
+import java.sql.Date;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -29,18 +28,18 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	private static final String START_MESSAGE 
 		= "1~100 사이의 임의의 숫자를 맞춰보세요\n-----기회는 5번입니다.-----";
 	private Container con = getContentPane();
-	private RecordListDialog recordListDialog = new RecordListDialog(this, "기록 목록", true);
-
 	
+	private RecordListDialog recordListDialog =
+			new RecordListDialog(this, "기록 목록", true);
 	
 	// North
 	private JPanel pnlNorth = new JPanel();
 	private JTextField tfInput = new JTextField(5);
 	private JButton btnInput = new JButton("입력");
 	private JLabel lblRecord = new JLabel("기록:");
-	private JTextField tfRecord = new JTextField("30000");
-	private JButton btnNewGame = new JButton("새게임");
+	private JTextField tfRecord = new JTextField("300000");
 	private JButton btnRecordList = new JButton("기록보기");
+	private JButton btnNewGame = new JButton("새게임");
 	
 	// Center
 	private JTextArea taMessage = new JTextArea(START_MESSAGE);
@@ -62,6 +61,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		setSize(700, 500);
 		setUI();
 		setListener();
+		setLocationRelativeTo(null);
 		setVisible(true);
 		init();
 	}
@@ -101,9 +101,9 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		pnlNorth.add(tfInput);
 		pnlNorth.add(btnInput);
 		pnlNorth.add(lblRecord);
-		int minScore = scoreDao.getMinScore();//신기록 다시보기
-//		System.out.println("minScore:"+minScore);
-		tfRecord.setText(String.valueOf(minScore));//신기록 다시보기
+		int minScore = scoreDao.getMinScore();
+		System.out.println("minScore:" + minScore);
+		tfRecord.setText(String.valueOf(minScore));
 		pnlNorth.add(tfRecord);
 		pnlNorth.add(btnRecordList);
 		pnlNorth.add(btnNewGame);
@@ -141,7 +141,7 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 			return;
 		}
 //		ScoreVo scoreVo = new ScoreVo(username, (int)score);
-		ScoreVo scoreVo = new ScoreVo();//여기서부터 다시봐 밑에 완료메세지 까지
+		ScoreVo scoreVo = new ScoreVo();
 		scoreVo.setUserId(loginVo.getUserId());
 		scoreVo.setScore((int)score);
 		boolean result = scoreDao.addScore(scoreVo);
@@ -160,7 +160,6 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		if (score < lRecord) {
 			tfRecord.setText(String.valueOf(score));
 		}
-		
 		
 	}
 
@@ -186,7 +185,6 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		Object obj = e.getSource();
-		
 		if (obj == tfInput || obj == btnInput) {
 			String userInput = tfInput.getText();
 			try {
@@ -226,59 +224,76 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		}
 		
 	}
-	class RecordListDialog extends JDialog implements ActionListener{//쌤이한거 소영씨 한테 물어봄 다시보기
-		private JTextArea taList = new JTextArea();
-		private JPanel pnlImage = new JPanel();
-		private JButton btnLeft = new JButton(new ImageIcon("images/left.png"));
-		private JButton btnRight = new JButton(new ImageIcon("images/right.png"));
-		private JLabel lblPage = new JLabel("0/0");
+	
+	class RecordListDialog extends JDialog implements ActionListener {
+		
+		JTextArea taList = new JTextArea();
+		JButton btnLeft = new JButton(new ImageIcon("images/left.png"));
+		JButton btnRight = new JButton(new ImageIcon("images/right.png"));
+		JLabel lblPage = new JLabel("0/0");
 		int curPage = 1;
 		int totalPage;
-		RowNumDto rowNumDto = new RowNumDto(); //다시봐(1~10 들어있음)
+		RowNumDto rowNumDto = new RowNumDto();
+		
 		public RecordListDialog(JFrame owner, String title, boolean modal) {
 			super(owner, title, modal);
 			setSize(500, 400);
+			setUI();
+			setPageNum();
+			setLocationRelativeTo(GuessNumFrame.this);
+		}
+		
+		private void setPageNum() {
 			int count = scoreDao.getCount();
+			// count  	totalPage   계산식
+			// 1        1           0 + 1
+			// 10       1           1
+			// 11       2           1 + 1
+			// 20       2           2
+			// 21       3
 			/*
-			this.totalPage = count /10;
-			if(count % 10 > 0) {
-				this.totalPage +=1;
-			}*/
-			this.totalPage = (int)Math.ceil((double)count/10);
-			lblPage.setText(curPage+"/"+totalPage);
-			taList.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-			taList.setEditable(false);
-			//add(new JScrollPane(taList));
-			this.add(taList,BorderLayout.CENTER);
-			this.add(pnlImage,BorderLayout.SOUTH);
-			lblPage.setFont(new Font("맑은 고딕", Font.BOLD, 20));
-			pnlImage.add(btnLeft);
-			pnlImage.add(lblPage);
-			pnlImage.add(btnRight);
-			pnlImage.setBackground(Color.GREEN);
+			this.totalPage = count / 10;
+			if (count % 10 > 0) {
+				this.totalPage += 1;
+			}
+			*/
+			this.totalPage = (int)Math.ceil((double)count / 10);
+			System.out.println("totalPage:" + totalPage);
+			lblPage.setText(curPage + "/" + totalPage);
+		}
+		
+		private void setUI() {
+			JPanel pnlSouth = new JPanel();
 			btnLeft.addActionListener(this);
 			btnRight.addActionListener(this);
+			lblPage.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+			pnlSouth.add(btnLeft);
+			pnlSouth.add(lblPage);
+			pnlSouth.add(btnRight);
+			taList.setFont(new Font("맑은 고딕", Font.BOLD, 20));
+			taList.setEditable(false);
+			add(taList);
+			add(pnlSouth, BorderLayout.SOUTH);
+			
 			btnLeft.setEnabled(false);
-			//scoreuservo 바꿔
-			
-			
 		}
 		
 		public void getAll() {
 			taList.setText("");
 			
-			Vector<ScoreUserVo> recordList = scoreDao.getAll(rowNumDto);//다시봐
+			Vector<ScoreUserVo> recordList = scoreDao.getAll(rowNumDto);
 			System.out.println("recordList:" + recordList);
 //			for (ScoreUserVo scoreUserVo: recordList) {
 			for (int i = 0; i < recordList.size(); i++) {
 				ScoreUserVo scoreUserVo = recordList.get(i);
+				int rn = scoreUserVo.getRn();
 				String userId = scoreUserVo.getUserId();
 				String userName = scoreUserVo.getUserName();
 				int score = scoreUserVo.getScore();
 				Date regdate = scoreUserVo.getRegdate();
 				String grade = scoreUserVo.getGrade();
 				
-				taList.append(String.valueOf(i + 1));
+				taList.append(String.valueOf(rn));
 				taList.append(".");
 				taList.append(userId);
 				taList.append(" | ");
@@ -296,25 +311,31 @@ public class GuessNumFrame extends JFrame implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			Object obj = e.getSource();
-			
-			if(obj == btnLeft) {
+			if (obj == btnLeft) {
 				curPage--;
-				
-				
-			} else if(obj == btnRight){
+			} else if (obj == btnRight) {
 				curPage++;
-				if(curPage == totalPage) {
-					btnRight.setEnabled(false);
-				} else if(curPage < totalPage) {
-					btnRight.setEnabled(true);
-				}
-				if(curPage > totalPage) {
-					curPage = totalPage;
-				}
-				
-				rowNumDto.setStartEndRow(curPage);
-				getAll();
 			}
+			
+			if (curPage == 1) {
+				btnLeft.setEnabled(false);
+			} else if (curPage > 1) {
+				btnLeft.setEnabled(true);
+			} else if (curPage < 1) {
+				curPage = 1;
+			}
+			
+			if (curPage == totalPage) {
+				btnRight.setEnabled(false);
+			} else if (curPage < totalPage) {
+				btnRight.setEnabled(true);
+			} else if (curPage > totalPage) {
+				curPage = totalPage;
+			}
+			
+			rowNumDto.setStartEndRow(curPage);
+			getAll();
+			setPageNum();
 			
 		}
 	}
