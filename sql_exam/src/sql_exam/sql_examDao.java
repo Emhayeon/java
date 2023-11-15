@@ -105,7 +105,7 @@ public class sql_examDao {
 		
 		try {
 			conn = this.getConnection();
-			String sql ="SELECT ";
+			String sql ="SELECT SNO,SNAME,SYEAR,GENDER,MAJOR,SCORE ";
 			
 			return true;
 		} catch (Exception e) {
