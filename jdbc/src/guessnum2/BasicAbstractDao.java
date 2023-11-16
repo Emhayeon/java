@@ -10,7 +10,7 @@ public abstract class BasicAbstractDao {
 	private static final String URL = "jdbc:oracle:thin:@localhost:1521:xe";
 	private static final String ID = "USER01";
 	private static final String PW = "1234";
-	protected static final int MIN_SCORE = 30000;
+	protected static final int MIN_SCORE = 30000; 
 	
 	protected Connection getConnection() {
 		try {
