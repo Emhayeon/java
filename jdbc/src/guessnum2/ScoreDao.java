@@ -13,7 +13,7 @@ public class ScoreDao extends BasicAbstractDao{
 	public static ScoreDao getInstance() {
 		return instance;
 	}
-	
+	 
 	
 	public boolean addScore(ScoreVo scoreVo) {
 		Connection conn = null;
