@@ -15,7 +15,7 @@ public class JDBCTest {
 		
 	}
 	  
-	
+	 
 	private static void readData() {
 		Vector<ScoreVo> vec = dao.getAll();
 		for(ScoreVo scoreVo : vec) {
