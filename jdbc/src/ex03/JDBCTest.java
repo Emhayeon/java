@@ -14,7 +14,7 @@ public class JDBCTest {
 		scanner.close();
 		
 	}
-	
+	  
 	
 	private static void readData() {
 		Vector<ScoreVo> vec = dao.getAll();
